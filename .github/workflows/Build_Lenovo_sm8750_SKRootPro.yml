@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       kernel_version:
-        description: "📝���请选择要编译的版本（仅在不勾选上方选项时生效）"
+        description: "📝请选择要编译的版本（仅在不勾选上方选项时生效）"
         required: false
         type: choice
         options:
@@ -161,7 +161,7 @@ jobs:
             echo "KERNEL_TIME=${{ env.CUSTOM_KERNEL_TIME }}" >> $GITHUB_ENV
           fi
 
-      - name: 🛠��� Install dependencies and Initialize repo and sync （安装环境依赖+初始化源码仓库及工具链）
+      - name: 🛠 Install dependencies and Initialize repo and sync （安装环境依赖+初始化源码仓库及工具链）
         run: |
           rm -rf kernel_workspace
           mkdir kernel_workspace
@@ -206,7 +206,7 @@ jobs:
             done
           # fi
 
-      - name: 🛠��� Set ccache DIR(配置ccache目录)
+      - name: 🛠 Set ccache DIR(配置ccache目录)
         run: |
           echo "CCACHE_DIR=$HOME/.ccache_${{ env.KERNEL_VERSION }}" >> $GITHUB_ENV
           echo "CCACHE_MAXSIZE=10G" >> $GITHUB_ENV
@@ -220,7 +220,7 @@ jobs:
           echo "当前磁盘空间："
           df -h
 
-      - name: 📥��� Restore ccache (载入当前机型的ccache缓存)
+      - name: 📥 Restore ccache (载入当前机型的ccache缓存)
         id: ccache-restore
         uses: actions/cache/restore@v5
         with:
@@ -230,7 +230,7 @@ jobs:
             ccache-${{ env.KERNEL_VERSION }}${{ env.CACHE_VARIANT }}-
             ccache-${{ env.KERNEL_VERSION }}-
 
-      - name: 🔎��� Find public ccache in releases (查找公共缓存)
+      - name: 🔎 Find public ccache in releases (查找公共缓存)
         id: public-ccache
         if: ${{ steps.ccache-restore.outputs.cache-matched-key == '' }}
         uses: actions/github-script@v8
@@ -309,7 +309,7 @@ jobs:
             core.setOutput('release-tag', selected.tag);
             core.setOutput('source-repo', selected.repo);
 
-      - name: 📦��� Restore public ccache from releases (恢复公共缓存)
+      - name: 📦 Restore public ccache from releases (恢复公共缓存)
         if: ${{ steps.ccache-restore.outputs.cache-matched-key == '' && steps.public-ccache.outputs.asset-name != '' }}
         env:
           GH_TOKEN: ${{ github.token }}
@@ -340,7 +340,7 @@ jobs:
           echo "PUBLIC_CCACHE_USED=true" >> "$GITHUB_ENV"
           echo "公共缓存恢复完成：$CCACHE_DIR"
       
-      - name: 📥��� Init ccache (初始化配置ccache)
+      - name: 📥 Init ccache (初始化配置ccache)
         run: |
           # 设置ccache环境变量
           export CCACHE_COMPILERCHECK="none"
@@ -373,7 +373,7 @@ jobs:
             echo "未命中仓库缓存，也未找到公共缓存，将从空缓存开始构建"
           fi
 
-      - name: 🔧��� Add Re-Kernel Support (添加 Re-Kernel 支持)
+      - name: 🔧 Add Re-Kernel Support (添加 Re-Kernel 支持)
         if: ${{ env.ENABLE_REKERNEL == 'true' }}
         run: |
             cd kernel_workspace
@@ -399,7 +399,7 @@ jobs:
               echo "⚠️ 不支持的内核版本: $TARGET"
             fi
 
-      - name: 🔧��� Add adios_ioscheduler (添加 adios_ioscheduler)
+      - name: 🔧 Add adios_ioscheduler (添加 adios_ioscheduler)
         working-directory: kernel_workspace/common
         run: |
           echo "开始添加 ADIOS I/O 调度器支持..."
@@ -442,7 +442,7 @@ jobs:
           git apply -p1 < 001-lz4.patch || true
           patch -p1 < 002-zstd.patch || true
           
-      - name: 🛠��� Set Baseband-guard (配置BBG基带守护)
+      - name: 🛠 Set Baseband-guard (配置BBG基带守护)
         if: ${{ env.ENABLE_BBG == 'true' }}
         run: |
           echo "正在启用启用内核级基带保护支持…"
@@ -452,7 +452,7 @@ jobs:
           sed -i '/^config LSM$/,/^help$/{ /^[[:space:]]*default/ { /baseband_guard/! s/lockdown/lockdown,baseband_guard/ } }' ./common/security/Kconfig
 
       
-      - name: 🔧��� Apply Droidspaces SYSVIPC kABI fix (应用 Droidspaces SYSVIPC kABI 修复)
+      - name: 🔧 Apply Droidspaces SYSVIPC kABI fix (应用 Droidspaces SYSVIPC kABI 修复)
         if: ${{ env.ENABLE_DROIDSPACES == 'true' }}
         working-directory: kernel_workspace/common
         run: |
@@ -467,7 +467,7 @@ jobs:
           fi
           echo "==> Droidspaces SYSVIPC kABI 修复完成"
 
-      - name: 🔧��� Apply ntsync Patch (应用 ntsync 补丁)
+      - name: 🔧 Apply ntsync Patch (应用 ntsync 补丁)
         if: ${{ env.ENABLE_DROIDSPACES == 'true' }}
         working-directory: kernel_workspace/common
         run: |
@@ -486,7 +486,7 @@ jobs:
           done
           echo "==> ntsync 补丁应用完成"
 
-      - name: 🔧��� Set gki_defconfig (设置编译配置)
+      - name: 🔧 Set gki_defconfig (设置编译配置)
         run: |
           cd kernel_workspace
           DEFCONFIG="./common/arch/arm64/configs/gki_defconfig"
@@ -562,7 +562,7 @@ jobs:
           #Remove check_defconfig
           sudo sed -i 's/check_defconfig//' ./common/build.config.gki
 
-      - name: 🔧��� Set Kernel name (写入内核名称)
+      - name: 🔧 Set Kernel name (写入内核名称)
         run: |
           cd kernel_workspace
           echo "自定义后缀: $DEFAULT_SUFFIX"
@@ -570,11 +570,11 @@ jobs:
           sudo sed -i "s/-4k/$ESCAPED_SUFFIX/g" ./common/arch/arm64/configs/gki_defconfig
           sed -i 's/${scm_version}//' ./common/scripts/setlocalversion
 
-      - name: 📥��� Start build timer (构建计时开始)
+      - name: 📥 Start build timer (构建计时开始)
         run: 
           echo "BUILD_START=$(date +%s)" >> $GITHUB_ENV
 
-      - name: 🔨��� Build Kernel (构建内核)
+      - name: 🔨 Build Kernel (构建内核)
         run: |
           WORKDIR="$(pwd)"
           export PATH="/usr/lib/ccache:$PATH"
@@ -660,21 +660,21 @@ jobs:
           echo "编译后空间:"
           df -h
 
-      - name: 🕒��� Calculate build time (计算构建时间)
+      - name: 🕒 Calculate build time (计算构建时间)
         run: |
           END=$(date +%s)
           TIME=$((END - BUILD_START))
           echo "BUILD_TIME=$TIME" >> $GITHUB_ENV
           echo "Build time: $TIME seconds"
 
-      - name: 📥��� Save ccache if needed (构建时间较长或首次落地本地缓存时保存)
+      - name: 📥 Save ccache if needed (构建时间较长或首次落地本地缓存时保存)
         if: ${{ env.BUILD_TIME > 480 || steps.ccache-restore.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@v5
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-${{ env.KERNEL_VERSION }}${{ env.CACHE_VARIANT }}-${{ github.run_id }}
 
-      - name: 🧹��� Clean old ccache (清理旧缓存)
+      - name: 🧹 Clean old ccache (清理旧缓存)
         if: env.BUILD_TIME > 480
         uses: actions/github-script@v8
         env:
@@ -724,7 +724,7 @@ jobs:
 
             core.info(`旧缓存清理完成，共删除 ${deleted} 个缓存`);
 
-      - name: 🔨��� Build SKRoot Pro patcher (编译SKRoot修补工具)
+      - name: 🔨 Build SKRoot Pro patcher (编译SKRoot修补工具)
         if: ${{ env.ENABLE_SKROOT_PRO == 'true' }}
         run: |
           cd kernel_workspace
@@ -733,7 +733,7 @@ jobs:
           make -j$(nproc) patch_kernel_sk
           ls -l patch_kernel_sk
 
-      - name: 🩹��� Run SKRoot Pro patcher on Image (修补内核Image)
+      - name: 🩹 Run SKRoot Pro patcher on Image (修补内核Image)
         if: ${{ env.ENABLE_SKROOT_PRO == 'true' }}
         run: |
           cd kernel_workspace/common/out/arch/arm64/boot
@@ -746,25 +746,25 @@ jobs:
           ROOT_KEY=$(grep -oE '[A-Za-z0-9]{48}' skroot_patch.log | head -n 1 || true)
           echo "root_key=$ROOT_KEY" | tee skroot_root_key.txt
 
-      - name: 📤��� Upload SKRoot info (上传SKRoot修补信息)
+      - name: 📤 Upload SKRoot info (上传SKRoot修补信息)
         if: ${{ env.ENABLE_SKROOT_PRO == 'true' }}
         uses: actions/upload-artifact@v5
         with:
           name: skroot_pro_patch_info_${{ env.KERNEL_VERSION }}
           path: kernel_workspace/common/out/arch/arm64/boot/skroot_*
 
-      - name: 📦��� ReName Image  (修改镜像名)
+      - name: 📦 ReName Image  (修改镜像名)
         run: |
           cd kernel_workspace/common/out/arch/arm64/boot
           cp ./Image "./kernel"
 
-      - name: 📤��� Upload Image (上传 Image)
+      - name: 📤 Upload Image (上传 Image)
         uses: actions/upload-artifact@v5
         with:
          name: kernel_image_${{ env.KERNEL_VERSION }}
          path: kernel_workspace/common/out/arch/arm64/boot/kernel
          
-      - name: 📦��� Sign boot using AOSP test key (使用AOSP测试密钥签名boot)
+      - name: 📦 Sign boot using AOSP test key (使用AOSP测试密钥签名boot)
         if: ${{ env.ENABLE_SIGNED == 'true' }}
         run: |
           cd kernel_workspace
@@ -781,7 +781,7 @@ jobs:
           mv ./new-boot.img ./boot.img
           python3 rebuild_avb.py --chained-mode
 
-      - name: 📤��� Upload Signed boot (上传已签名的 boot)
+      - name: 📤 Upload Signed boot (上传已签名的 boot)
         if: ${{ env.ENABLE_SIGNED == 'true' }}
         uses: actions/upload-artifact@v5
         with:
@@ -794,7 +794,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: 🔎��� Find Re-Kernel module zip (查找Re-Kernel最新模块并下载)
+      - name: 🔎 Find Re-Kernel module zip (查找Re-Kernel最新模块并下载)
         id: download-rekernel
         uses: actions/github-script@v8
         env:
@@ -855,7 +855,7 @@ jobs:
             core.setOutput('download-url', targetAsset.browser_download_url);
             core.setOutput('version-number', versionNumber);
 
-      - name: 📥��� Download Re-Kernel module (下载 Re-Kernel 模块)
+      - name: 📥 Download Re-Kernel module (下载 Re-Kernel 模块)
         env:
           ASSET_NAME: ${{ steps.download-rekernel.outputs.asset-name }}
           DOWNLOAD_URL: ${{ steps.download-rekernel.outputs.download-url }}
@@ -875,7 +875,7 @@ jobs:
           echo "✓ 目录结构:"
           ls -lR "$ARTIFACT_NAME"
 
-      - name: 📤��� Upload Re-Kernel module (上传 Re-Kernel 模块)
+      - name: 📤 Upload Re-Kernel module (上传 Re-Kernel 模块)
         uses: actions/upload-artifact@v5
         with:
           name: Re-Kernel-v${{ steps.download-rekernel.outputs.version-number }}
