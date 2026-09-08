@@ -739,7 +739,8 @@ jobs:
         run: |
           cd kernel_workspace/common/out/arch/arm64/boot
           cp Image Image.orig
-          ../../../../../skrootpro/patch_kernel_sk Image 2>&1 | tee skroot_patch.log
+          # patch_kernel_sk is interactive: feed "1" (auto-generate root_key) and "1" (write immediately)
+          printf '1\n1\n' | ../../../../../skrootpro/patch_kernel_sk Image 2>&1 | tee skroot_patch.log
           if ! grep -q "Done" skroot_patch.log; then
             echo "::error::SKRoot patcher 未报告完成，请检查 skroot_patch.log"
           fi
