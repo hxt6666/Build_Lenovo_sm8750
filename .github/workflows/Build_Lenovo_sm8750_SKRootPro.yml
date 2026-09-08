@@ -729,6 +729,9 @@ jobs:
         run: |
           cd kernel_workspace
           git clone --depth 1 https://github.com/l11223/skrootpro-patch-tool.git skrootpro
+          # Fix upstream bug: 0xA5 is not a valid ARM64 logical immediate
+          sed -i "s/Imm(ROOT_KEY_XOR_BYTE)/Imm(0xA5A5A5A5)/g" skrootpro/patch_do_execve.cpp skrootpro/patch_filldir64.cpp
+          grep -R "0xA5A5A5A5" skrootpro/patch_do_execve.cpp skrootpro/patch_filldir64.cpp
           cd skrootpro
           make -j$(nproc) patch_kernel_sk
           ls -l patch_kernel_sk
